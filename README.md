@@ -16,6 +16,7 @@
 | 工程方法 engineering | [cross-layer-consistency](skills/engineering/cross-layer-consistency/SKILL.md) | 字段/联动要在 UI→前端payload→后端→第三方接口 四层都落实，缺一层就是 bug |
 | 工程方法 engineering | [read-the-encoding](skills/engineering/read-the-encoding/SKILL.md) | 结构性事实只能从编码源（DOM/schema/源码）读，不能从渲染物/转写稿读 |
 | 文档流程 docs-process | [organizing-project-docs](skills/docs-process/organizing-project-docs/SKILL.md) | 项目文档四分法：原文快照/内部理解/外部API参考/踩坑笔记 各自独立成文 |
+| 文档流程 docs-process | [claude-md-entry-point](skills/docs-process/claude-md-entry-point/SKILL.md) | CLAUDE.md 精简作 AI 会话入口，详细状态放 docs/status.md，AI 私有记忆只留跨项目经验 |
 | 集成对接 integration | [third-party-api-lookup](skills/integration/third-party-api-lookup/SKILL.md) | 查阅/逆向第三方开放平台 API，从 DOM 编码源抓字段层级，落库+回读验证 |
 
 > 根目录的 `SKILL.md`（`cybertron-studio`）是一个独立的全栈脚手架 skill（React 前端 + Go 后端 +
