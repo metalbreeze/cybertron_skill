@@ -42,5 +42,9 @@
 |---|---|---|
 | ai.water（专利+demo 项目） | [projects/ai.water/status.md](projects/ai.water/status.md) | 详版状态/交付清单/工艺约定/待办/决策记录 |
 | 同上 | [projects/ai.water/CLAUDE.md](projects/ai.water/CLAUDE.md) | 精简会话入口，恢复时拷到项目根 `ai.water/CLAUDE.md` |
+| linglong（B2B 订购商城 + 管家婆 ERP） | [projects/linglong/status.md](projects/linglong/status.md) | 详版状态/订单状态模型/踩坑摘要/决策记录/待办 |
+| 同上 | [projects/linglong/CLAUDE.md](projects/linglong/CLAUDE.md) | 精简会话入口，恢复时拷到项目根 `linglong/CLAUDE.md` |
 
 换机器接续：clone 本仓库 → 把 `projects/<项目>/CLAUDE.md` 拷到项目根 → 新会话自动接上。
+
+> ⚠️ 本仓库是 **public**：`projects/` 下只放状态与约定，**凭据一律不进**，只写"它在生产 systemd / 在本机某个 gitignore 文件里"。见 [portable-claude-project](skills/docs-process/portable-claude-project/SKILL.md) 的「会话归档会泄密」一节。
