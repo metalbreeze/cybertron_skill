@@ -17,10 +17,11 @@
 | 工程方法 engineering | [read-the-encoding](skills/engineering/read-the-encoding/SKILL.md) | 结构性事实只能从编码源（DOM/schema/源码）读，不能从渲染物/转写稿读 |
 | 文档流程 docs-process | [organizing-project-docs](skills/docs-process/organizing-project-docs/SKILL.md) | 项目文档四分法：原文快照/内部理解/外部API参考/踩坑笔记 各自独立成文 |
 | 文档流程 docs-process | [claude-md-entry-point](skills/docs-process/claude-md-entry-point/SKILL.md) | CLAUDE.md 精简作 AI 会话入口，详细状态放 docs/status.md，AI 私有记忆只留跨项目经验 |
+| 文档流程 docs-process | [portable-claude-project](skills/docs-process/portable-claude-project/SKILL.md) | 换机器/搬文件夹后 AI 仍完整可用：会话记录靠 SessionEnd hook 落进 repo，`/export` 自动化不了 |
 | 集成对接 integration | [third-party-api-lookup](skills/integration/third-party-api-lookup/SKILL.md) | 查阅/逆向第三方开放平台 API，从 DOM 编码源抓字段层级，落库+回读验证 |
 
 > 根目录的 `SKILL.md`（`cybertron-studio`）是一个独立的全栈脚手架 skill（React 前端 + Go 后端 +
-> SQLite/MySQL/PostgreSQL），与上表 7 个方法论型 skill 性质不同，按需单独使用。
+> SQLite/MySQL/PostgreSQL），与上表 8 个方法论型 skill 性质不同，按需单独使用。
 
 ## 怎么用
 
