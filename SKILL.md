@@ -23,6 +23,33 @@ This skill guides full-stack development for cybertron.studio projects:
 7. **Unconfirmed external API methods**: Before calling any third-party or ERP API method that has not been explicitly confirmed to exist (e.g. trying speculative names like `erp.ktype.list`, `erp.store.list`, `erp.warehouse.list`), **stop and ask the user for approval first**. Guessing API method names wastes quota, may trigger unexpected side effects, and erodes trust. Only call an API method you have seen documented or observed working in a prior successful response.
 8. **Missing preferred tool**: When the best or preferred tool for a task is missing (a CLI, library, package, or MCP), **stop and report it to the user** with: (a) what the tool is, (b) why it's preferred, (c) what alternatives exist. Then **wait for the user's decision** before proceeding — do not silently fall back to an alternative or install anything on your own.
 9. **Use project-derived ports**: Compute `frontend_port = xxx*10+1` and `backend_port = xxx*10+2` from the project name using the algorithm in the **Port Derivation** section below. Never hardcode `:3000`, `:8080`, or other common ports that collide with other tools.
+10. **Push back on authoritative-sounding domain assumptions**: When the user makes a categorical claim about how an external system or domain behaves — e.g. "X is always derivable from Y", "the API guarantees Z", "field F never changes after creation" — pause before agreeing and explicitly enumerate edge cases that could break the claim before adopting it as a design assumption. In particular, sanity-check against:
+    - **Idle / no-activity periods** — values that "look fixed" during use may roll, expire, or get re-issued when there's no traffic (rolling windows, session tokens, rate-limit counters).
+    - **Cached vs fresh** — what the API returned 5 minutes ago may not match what it returns now; what the client cached may not match server state.
+    - **Error / partial-failure paths** — does the claim still hold when a request times out, gets rate-limited, or returns a stale 304?
+    - **Time zones, DST, leap seconds, clock skew** — anything time-related has a long tail of edge cases.
+    - **Authorization changes** — permissions, plan tiers, or feature flags can change the field's meaning mid-session.
+
+    If you can construct a single concrete counterexample, surface it to the user and ask them to think it through before encoding the assumption into code or a refactor. The cost of a 30-second sanity check is far lower than the cost of a logic bug discovered weeks later in production.
+
+11. **Verify external API endpoints against official docs FIRST, not community SDKs**: When integrating any third-party API (payment, ad platform, ERP, OAuth provider, etc.), the official documentation is the only authoritative source for endpoint URLs. Community SDKs (Go modules, PyPI, npm) are useful for field names and request/response shapes — but their **URL values are frequently stale** because providers deprecate endpoints faster than maintainers update SDKs. Empirically: a 3-month-old SDK can already point at endpoints the provider has removed. Before writing any client code:
+    1. Find the endpoint in the provider's official docs site (not Stack Overflow, not blog posts, not SDK source)
+    2. Read the page's `请求接口:` / `Endpoint:` / `URL:` line — that is the current path
+    3. Grep the provider's changelog/release notes for that URL to confirm it's not in any "deprecated" / "下线" / "sunset" list
+    4. Note the page's "last updated" date — if older than 1 year on a fast-moving platform, treat the entire endpoint family as suspect
+    5. Use the SDK only for: field names, type information, nested structure, success-code conventions per endpoint
+
+    Time-based heuristics for SDK staleness:
+    - SDK last commit < 3 months ago: probably current, still verify URL against docs
+    - 3-6 months: at least one endpoint may have moved
+    - 6-12 months: entire endpoint families may have been migrated (e.g. `/v1/...` → `/gw/dsp/...`)
+    - > 12 months: assume abandonware; treat as field-name reference only
+
+    Versioning prefix as a signal: paths like `/v1/...` are often the older generation; new gateways tend to introduce a new prefix (`/gw/`, `/api/v2/`, etc.) when they migrate. If you see two prefixes in the same provider's surface, ask: "which generation is current?" before picking either.
+
+    See `references/external-api-docs.md` for the detailed verification workflow, real-world examples of SDK-staleness failures, and a checklist to run before writing any external API client code.
+
+12. **Confirm understanding by restating, not by saying "yes"**: When the user asks "你理解了吗？" / "我的话理解了吗？" / "懂了吗？" or any similar comprehension check, do NOT reply with a bare "yes/understood". Instead, **paraphrase in your own words the thing they just described** (the problem, decision, or constraint they raised) so they can verify alignment before you act. A restatement proves comprehension and surfaces any misread early; a bare "yes" hides misunderstandings. Then proceed with the work.
 
 ---
 
@@ -117,6 +144,7 @@ Then follow the templates in the reference files.
 
 - `references/go-backend.md` — Go backend patterns: middleware, GORM setup, handler templates, interface.md & database.md formats
 - `references/react-frontend.md` — React patterns: responsive layout, API client, component structure, TypeScript types
+- `references/external-api-docs.md` — How to find and verify endpoint paths for any third-party API (payment, ad platform, ERP, OAuth, etc.). Verification ladder, time-based SDK staleness heuristics, real-world failure examples. **Read before writing any external API client.**
 
 Read the relevant reference file before writing any code.
 

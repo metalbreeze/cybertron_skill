@@ -32,3 +32,15 @@
   项目规范里。
 - 每个 `SKILL.md` 都是自包含的：一句话规则 + 真实案例 + 该怎么做的对照表 + 红旗自查清单，可以直接
   读、直接照做，不需要额外上下文。
+
+## 项目状态存档 projects/
+
+除 skills 外，本仓库还承担**项目状态的可搬迁存档**（见 [claude-md-entry-point](skills/docs-process/claude-md-entry-point/SKILL.md) 与
+[portable-claude-project](skills/docs-process/portable-claude-project/SKILL.md) 的分层方案）：
+
+| 项目 | 存档 | 说明 |
+|---|---|---|
+| ai.water（专利+demo 项目） | [projects/ai.water/status.md](projects/ai.water/status.md) | 详版状态/交付清单/工艺约定/待办/决策记录 |
+| 同上 | [projects/ai.water/CLAUDE.md](projects/ai.water/CLAUDE.md) | 精简会话入口，恢复时拷到项目根 `ai.water/CLAUDE.md` |
+
+换机器接续：clone 本仓库 → 把 `projects/<项目>/CLAUDE.md` 拷到项目根 → 新会话自动接上。
