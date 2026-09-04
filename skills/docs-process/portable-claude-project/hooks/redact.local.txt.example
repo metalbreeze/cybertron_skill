@@ -1,0 +1,20 @@
+# Copy to redact.local.txt, fill in, chmod 600, and add to .gitignore:
+#
+#     .claude/hooks/redact.local.txt
+#
+# One literal secret per line. Blank lines and lines starting with # are ignored.
+# These are matched as literal strings (re.escape), so no escaping needed.
+#
+# Why this file exists: the renderer's built-in regexes only match well-known
+# platform key shapes (sk-, ghp_, AKIA, 64-hex, Bearer). Self-hosted credentials
+# have no such shape -- on one real project they scored 0 regex hits against 89
+# actual occurrences. Nothing but a literal list catches those.
+#
+# Keep in sync with production systemd / .env. A credential added there but not
+# here goes into the very next session archive in plain text.
+
+# <admin password>
+# <third-party app secret>
+# <third-party sign key>
+# <JWT signing secret>
+# <webhook shared secret>

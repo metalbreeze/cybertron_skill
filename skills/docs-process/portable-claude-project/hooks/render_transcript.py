@@ -14,6 +14,7 @@ than raising.
 import json
 import re
 import sys
+from pathlib import Path
 from datetime import datetime
 
 # --- Secret redaction -------------------------------------------------------
@@ -30,6 +31,20 @@ SECRET_PATTERNS = [
     (re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----.*?-----END [A-Z ]*PRIVATE KEY-----",
                 re.S), "-----BEGIN PRIVATE KEY-----***REDACTED***-----END PRIVATE KEY-----"),
 ]
+
+# The patterns above only recognise well-known platform key shapes. Self-hosted
+# credentials -- an ERP app secret, a service admin password, a JWT signing key --
+# match none of them: scanning one real 2 MB archive found 89 occurrences of such
+# secrets and 0 hits from the patterns above. So also redact literal strings listed
+# one per line in redact.local.txt (gitignored, chmod 600; # starts a comment).
+# Add a line whenever the project gains a credential, or it lands in the next archive.
+_LOCAL_LIST = Path(__file__).with_name("redact.local.txt")
+if _LOCAL_LIST.is_file():
+    for _line in _LOCAL_LIST.read_text(encoding="utf-8", errors="replace").splitlines():
+        _literal = _line.strip()
+        if _literal and not _literal.startswith("#"):
+            SECRET_PATTERNS.append(
+                (re.compile(re.escape(_literal)), "***REDACTED-LOCAL***"))
 
 
 def redact(text):

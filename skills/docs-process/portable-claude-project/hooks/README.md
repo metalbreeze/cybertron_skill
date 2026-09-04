@@ -10,13 +10,20 @@ mkdir -p <your-project>/.claude/hooks
 cp archive-session.sh render_transcript.py <your-project>/.claude/hooks/
 chmod +x <your-project>/.claude/hooks/archive-session.sh
 
+# 项目自己的凭据字面量表（必做，理由见下）
+cp redact.local.txt.example <your-project>/.claude/hooks/redact.local.txt
+chmod 600 <your-project>/.claude/hooks/redact.local.txt
+$EDITOR <your-project>/.claude/hooks/redact.local.txt
+
 # 把 settings.snippet.json 的内容并进 <your-project>/.claude/settings.json
 ```
 
-再加一行 `.gitignore`：
+`.gitignore`：
 
 ```gitignore
 docs/sessions/*.jsonl
+docs/sessions/*.md              # 归档仍留在磁盘上，只是不进远端
+.claude/hooks/redact.local.txt  # 这份就是密钥清单本身
 ```
 
 ## 装完先验一次，别等到真的关会话才发现不工作
@@ -33,8 +40,18 @@ ls docs/sessions/
 
 ## ⚠️ 提交归档前必须扫密钥
 
-`render_transcript.py` 已内置常见 key 形状的脱敏，但那是正则匹配，**不是保证**。
-自建服务的 token 格式对不上就会漏。
+`render_transcript.py` 内置的脱敏只认**知名平台的 key 形状**（`sk-` / `ghp_` / `AKIA` /
+64-hex / `Bearer`）。实测一份真实归档（8000+ 轮 / 2.0 MB）：
+
+| | 命中 |
+|---|---|
+| 内置通用正则 | **0** |
+| 项目真实凭据（管理员口令 / ERP appsecret / 签名密钥 / JWT secret…） | **89** |
+
+**不是漏几个，是一个都接不住** —— 自建服务的密码根本没有"形状"。
+所以 `redact.local.txt`（字面量表）不是可选项，补完后同一份归档复扫 **89 → 0**。
+
+**项目新增凭据 = 同时补一行**，否则它下次会话就明文进归档。
 
 **public repo 建议直接 `docs/sessions/*.md` 也 gitignore** —— 归档仍写在磁盘上，
 整个文件夹拷走时照样跟着走，只是不进公开远端。

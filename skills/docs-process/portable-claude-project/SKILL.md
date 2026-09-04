@@ -178,6 +178,43 @@ SECRET_PATTERNS = [
 
 **但这是正则匹配，不是保证。** 自建服务的 token 格式千奇百怪，形状对不上就漏。
 
+**"会漏"的实际比例比直觉难看得多。** 在第二个项目上装完这套机制后扫了一份真实归档
+（8000+ 轮 → 2.0 MB Markdown）：
+
+| | 命中数 |
+|---|---|
+| 上面那套通用正则（OpenAI / GitHub / AWS / 64-hex / Bearer） | **0** |
+| 该项目真实凭据（管理员口令、ERP appsecret/appkey/signkey、JWT 签名密钥…） | **89** |
+
+**不是"漏了几个"，是一个都没接住。** 因为那些凭据全是自建服务和 ERP 的，
+没有 `sk-` / `ghp_` / `AKIA` 这类前缀特征，也不是 64-hex ——
+**通用正则认的是"知名平台的形状"，而你项目里的密码根本没有形状。**
+GitHub push protection 同理，一个都拦不住。
+
+### 第一道防线补上第二层：字面量脱敏表
+
+正则管"形状已知"的，字面量表管"形状未知但值已知"的 —— 后者才是自建项目的大头。
+让渲染器额外读一个**不进 git** 的字面量清单：
+
+```python
+# render_transcript.py，接在 SECRET_PATTERNS 后面
+_LOCAL_LIST = Path(__file__).with_name("redact.local.txt")
+if _LOCAL_LIST.is_file():
+    for _line in _LOCAL_LIST.read_text(encoding="utf-8", errors="replace").splitlines():
+        _literal = _line.strip()
+        if _literal and not _literal.startswith("#"):
+            SECRET_PATTERNS.append(
+                (re.compile(re.escape(_literal)), "***REDACTED-LOCAL***"))
+```
+
+`redact.local.txt` = 一行一个密文，`#` 注释，`chmod 600`，**写进 `.gitignore`**。
+内容与生产的 systemd / `.env` 保持同步 —— **新加一个凭据就补一行**，
+否则它下一次会话就明文进归档。上面那份归档补完后复扫：**89 → 0**。
+
+> 这也是为什么 `.gitignore` 里除了 `*.jsonl` 还建议连 `*.md` 一起排除：
+> 两层脱敏都是尽力而为，而"漏一个就等于没做"。
+
+
 **第二道：public repo 直接别提交归档。**
 
 ```gitignore
@@ -225,6 +262,9 @@ EOF
   会话里有你粘过的每一个 key**
 - 以为 GitHub push protection 会兜底 → 它只认得出主流平台的 key 格式，
   自建服务的 token 一个都拦不住
+- 以为自带的脱敏正则够用 → 实测一份归档：通用正则 0 命中、项目真实凭据 89 处。
+  **必须另外维护 `redact.local.txt` 字面量表**
+- 项目新增了一个密钥，只改了 systemd 没补 `redact.local.txt` → 它从下次会话起明文进归档
 - 渲染器没做脱敏就往 private repo 提交归档 → private 不等于安全，
   协作者、被 fork、将来转 public 都会暴露
 - 新机器 clone 下来 AI 说"我不知道这个项目在做什么" → `CLAUDE.md` 没覆盖到，见 [[claude-md-entry-point]]
