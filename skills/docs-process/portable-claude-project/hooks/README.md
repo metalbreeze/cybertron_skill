@@ -30,3 +30,13 @@ ls docs/sessions/
 
 `<编码路径>` 是项目绝对路径把 `/` 换成 `-`，例如
 `/Users/me/work/proj` → `-Users-me-work-proj`。
+
+## ⚠️ 提交归档前必须扫密钥
+
+`render_transcript.py` 已内置常见 key 形状的脱敏，但那是正则匹配，**不是保证**。
+自建服务的 token 格式对不上就会漏。
+
+**public repo 建议直接 `docs/sessions/*.md` 也 gitignore** —— 归档仍写在磁盘上，
+整个文件夹拷走时照样跟着走，只是不进公开远端。
+
+详见 `../SKILL.md` 的「会话归档会泄密」一节。

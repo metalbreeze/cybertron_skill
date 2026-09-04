@@ -143,6 +143,76 @@ enterprise  >  personal (~/.claude/skills/)  >  project (.claude/skills/)  >  bu
 - 全局 `~/.claude/CLAUDE.md` → 从旧机器拷，或看本文件末尾摘录
 ```
 
+## ⚠️ 会话归档会泄密 —— 这是本 skill 最容易翻车的地方
+
+**会话记录里有凭据。** 用户粘贴过的 key、API 回给你的 token、curl 命令里的
+`Authorization: Bearer ...`，全都逐字躺在 `.jsonl` 里。把归档提交进 git =
+把这些凭据提交进 git。
+
+真实案例：第一次装完这套机制、第一次提交归档，GitHub push protection 直接拒绝：
+
+```
+remote:   —— OpenAI API Key ————————————————————————
+remote:    locations:
+remote:      - path: docs/sessions/2026-09-04-90e71024.md:634
+```
+
+扫一遍那份归档，实际有 **1 个 OpenAI key + 10 个 64-hex bearer token**。
+GitHub 只认得出第一个 —— 另外 10 个是自建服务的 token，没有任何平台会替你拦。
+
+### 两道防线，都要上
+
+**第一道：渲染时脱敏。** `render_transcript.py` 里加正则替换，覆盖常见形状：
+
+```python
+SECRET_PATTERNS = [
+    (re.compile(r"sk-(?:proj-|ant-)?[A-Za-z0-9_\-]{20,}"), "sk-***REDACTED***"),
+    (re.compile(r"gh[pousr]_[A-Za-z0-9]{20,}"),             "ghp_***REDACTED***"),
+    (re.compile(r"AKIA[0-9A-Z]{16}"),                       "AKIA***REDACTED***"),
+    (re.compile(r"(?i)(bearer\s+)[A-Za-z0-9._\-]{20,}"),   r"\1***REDACTED***"),
+    (re.compile(r"\b[0-9a-f]{64}\b"),                      "***REDACTED-64HEX***"),
+    (re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----.*?-----END [A-Z ]*PRIVATE KEY-----", re.S),
+     "-----BEGIN PRIVATE KEY-----***REDACTED***-----END PRIVATE KEY-----"),
+]
+```
+
+**但这是正则匹配，不是保证。** 自建服务的 token 格式千奇百怪，形状对不上就漏。
+
+**第二道：public repo 直接别提交归档。**
+
+```gitignore
+docs/sessions/*.jsonl
+docs/sessions/*.md      # public repo 加这行；private repo 可以去掉
+```
+
+代价很小：归档文件仍然写在磁盘上，**整个文件夹拷走时照样跟着走** ——
+只有 `git clone` 这一条路拿不到。而"搬迁项目"这个原始需求，物理搬移是主场景。
+
+### 装完必做的验证
+
+提交前扫一遍，别指望平台兜底：
+
+```bash
+python3 - <<'EOF'
+import re, pathlib, sys
+pats = {
+    "OpenAI":  r"sk-(?:proj-|ant-)?[A-Za-z0-9_\-]{20,}",
+    "GitHub":  r"gh[pousr]_[A-Za-z0-9]{20,}",
+    "AWS":     r"AKIA[0-9A-Z]{16}",
+    "64-hex":  r"\b[0-9a-f]{64}\b",
+}
+bad = 0
+for f in pathlib.Path("docs/sessions").glob("*.md"):
+    t = f.read_text(errors="replace")
+    for name, pat in pats.items():
+        n = len(re.findall(pat, t))
+        if n:
+            print(f"{f.name}: {name} x{n}")
+            bad += n
+print("CLEAN" if not bad else f"*** {bad} SECRETS -- DO NOT COMMIT ***")
+EOF
+```
+
 ## 红旗自查
 
 - 想让 hook 去调 `/export` → 停，hook 驱动不了交互命令，改成搬 `.jsonl`
@@ -151,6 +221,12 @@ enterprise  >  personal (~/.claude/skills/)  >  project (.claude/skills/)  >  bu
 - 手工拷 `~/.claude/projects/<编码路径>/` 到新机器 → 目录名是绝对路径编码的，新机器路径不同就对不上，必须重命名
 - 会话归档目录没进 `.gitignore` 做 `.jsonl` 过滤 → 几十次会话后 repo 膨胀到 GB
 - 密钥为了"可搬迁"进了 git → 停，写 runbook 指路，不搬实体
+- **把会话归档提交进 public repo 之前没扫过密钥 → 停，先跑上面那段扫描；
+  会话里有你粘过的每一个 key**
+- 以为 GitHub push protection 会兜底 → 它只认得出主流平台的 key 格式，
+  自建服务的 token 一个都拦不住
+- 渲染器没做脱敏就往 private repo 提交归档 → private 不等于安全，
+  协作者、被 fork、将来转 public 都会暴露
 - 新机器 clone 下来 AI 说"我不知道这个项目在做什么" → `CLAUDE.md` 没覆盖到，见 [[claude-md-entry-point]]
 
 ## 与相邻 skill 的分工

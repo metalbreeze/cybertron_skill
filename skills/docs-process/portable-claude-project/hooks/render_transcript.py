@@ -12,8 +12,33 @@ so this is deliberately defensive: anything unrecognised is skipped rather
 than raising.
 """
 import json
+import re
 import sys
 from datetime import datetime
+
+# --- Secret redaction -------------------------------------------------------
+# Conversations contain credentials: keys pasted by the user, tokens echoed
+# back by an API, bearer headers in curl commands. An archive committed to git
+# would leak all of them -- GitHub push protection blocks this, and on a
+# private remote nothing would catch it at all. Redact before writing.
+SECRET_PATTERNS = [
+    (re.compile(r"sk-(?:proj-|ant-)?[A-Za-z0-9_\-]{20,}"), "sk-***REDACTED***"),
+    (re.compile(r"gh[pousr]_[A-Za-z0-9]{20,}"), "ghp_***REDACTED***"),
+    (re.compile(r"AKIA[0-9A-Z]{16}"), "AKIA***REDACTED***"),
+    (re.compile(r"(?i)(bearer\s+)[A-Za-z0-9._\-]{20,}"), r"\1***REDACTED***"),
+    (re.compile(r"\b[0-9a-f]{64}\b"), "***REDACTED-64HEX***"),
+    (re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----.*?-----END [A-Z ]*PRIVATE KEY-----",
+                re.S), "-----BEGIN PRIVATE KEY-----***REDACTED***-----END PRIVATE KEY-----"),
+]
+
+
+def redact(text):
+    """Strip credential-shaped strings. Best effort, not a guarantee -- see
+    the skill's red-flag list before committing archives to a public repo."""
+    for pat, repl in SECRET_PATTERNS:
+        text = pat.sub(repl, text)
+    return text
+
 
 MAX_TOOL_CHARS = 800  # tool results can be megabytes; keep the archive readable
 
@@ -102,7 +127,7 @@ def main():
 
     with open(dst, "w", encoding="utf-8") as fh:
         fh.write("\n".join(header))
-        fh.write("\n".join(out))
+        fh.write(redact("\n".join(out)))
         fh.write("\n")
 
     print(f"rendered {turns} turns -> {dst}")
