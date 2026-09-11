@@ -143,7 +143,7 @@ enterprise  >  personal (~/.claude/skills/)  >  project (.claude/skills/)  >  bu
 - 全局 `~/.claude/CLAUDE.md` → 从旧机器拷，或看本文件末尾摘录
 ```
 
-## ⚠️ 会话归档会泄密 —— 这是本 skill 最容易翻车的地方
+## ⚠️ 会话归档会泄密 —— 这是本 skill 最容易故障的地方
 
 **会话记录里有凭据。** 用户粘贴过的 key、API 回给你的 token、curl 命令里的
 `Authorization: Bearer ...`，全都逐字躺在 `.jsonl` 里。把归档提交进 git =
