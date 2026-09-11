@@ -88,7 +88,7 @@ repo-root/
 | 学到一条跨项目的经验 | ❌ | ❌ | ✅ (feedback) |
 | 关键决策/pivot | ✅ (一句话) | ✅ (完整记录) | ❌ |
 
-## 红旗自查
+## 危险信号自查
 
 - `CLAUDE.md` 超过 80 行 → 挪东西去 `docs/status.md`
 - 想把项目状态写进 `~/.claude/**/memory/project_*.md` → 停,应该写进 repo 的 `docs/status.md`,memory 只放指针

@@ -250,7 +250,7 @@ print("CLEAN" if not bad else f"*** {bad} SECRETS -- DO NOT COMMIT ***")
 EOF
 ```
 
-## 红旗自查
+## 危险信号自查
 
 - 想让 hook 去调 `/export` → 停，hook 驱动不了交互命令，改成搬 `.jsonl`
 - 把 hook 写进 SKILL.md 的 frontmatter 指望会话结束时触发 → 停，skill hook 只在 skill 激活期间加载，要写进 `.claude/settings.json`
