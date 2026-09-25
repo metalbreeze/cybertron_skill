@@ -1,6 +1,6 @@
 # ai.water 项目状态
 
-> 最后更新：2026-09-05（本次会话结束时存档）。
+> 最后更新：2026-09-25（生成项目历程总结 PPT 后存档）。
 > 本文件是详版状态；AI 会话入口见同目录 [CLAUDE.md](CLAUDE.md)（应同步放在项目根 `/Users/shu/workspace/xingyu/ai.water/CLAUDE.md`）。
 
 ## 项目一句话
@@ -77,6 +77,7 @@ Cybertron Studio 的发明专利撰写/答复批注/配套申报材料 + 对应 
 
 ## 变更日志
 
+- 2026-09-25 生成《2026项目历程总结-20260925.pptx》（ai.water 根目录，17 页，pptxgenjs 生成，源脚本未入库）：覆盖水务AI/慧询KG-RAG/快手投放平台/新余钢铁日志分析/10专利/研发能力证明/4 Demo/足脊筛查分析/宣讲材料/展现系统规格/铁板厂视觉/方法沉淀/待办。同日发现 LibreOffice.app 丢失，已 `brew reinstall --cask libreoffice` 恢复；PDF 转图用 `/opt/homebrew/bin/pdftopng`。
 - 2026-09-05 建立本存档（cybertron_skill repo `projects/ai.water/`）；同步最新 cybertron-studio skill 进库。
 - 2026-07-27 adpilot 上线推送；四 demo 齐。
 - 2026-07-19 研发能力证明 ×10 + 附件清单 + SOC 仿真原型。
