@@ -2,9 +2,8 @@
 
 一组从真实项目实践中提炼出来的可复用 Claude Skills（`SKILL.md`）。它们不绑定某个具体技术栈或行业，
 专注于把"踩过一次坑之后总结出的方法论"沉淀成可以被 Claude 在未来任何项目里直接触发、直接照做的
-检查清单和流程。覆盖两大主题：**协作纪律**（如何诚实、清晰地和用户沟通——不糊弄、不静默截断用户数据、
-不说内部黑话、不用网络口语代替规范术语）与 **工程方法**（跨层一致性检查、从编码源而非渲染物读结构、
-项目文档体系搭建、第三方 API 查阅法）。
+检查清单和流程。覆盖 **协作纪律**（诚实、清晰地沟通，不静默截断用户数据、不说内部黑话）、
+**工程方法**（跨层一致性、编码源核对、项目文档和第三方API查阅）与 **浏览器测试**（独立Chrome实例和项目profile复用）。
 
 ## Skills 一览
 
@@ -16,23 +15,28 @@
 | 协作纪律 discipline | [academic-register](skills/discipline/academic-register/SKILL.md) | 报告用书面语体和学科规范术语，不自造词、不用网络口语；中文无公认译名时直接用英文 |
 | 工程方法 engineering | [cross-layer-consistency](skills/engineering/cross-layer-consistency/SKILL.md) | 字段/联动要在 UI→前端payload→后端→第三方接口 四层都落实，缺一层就是 bug |
 | 工程方法 engineering | [read-the-encoding](skills/engineering/read-the-encoding/SKILL.md) | 结构性事实只能从编码源（DOM/schema/源码）读，不能从渲染物/转写稿读 |
+| 浏览器测试 testing | [cdp-test-browser](skills/testing/cdp-test-browser/SKILL.md) | 按项目复用独立Chrome测试profile，核对实例归属，通过CDP/Playwright做页面验证、截图及授权范围内的同源查询 |
 | 文档流程 docs-process | [organizing-project-docs](skills/docs-process/organizing-project-docs/SKILL.md) | 项目文档四分法：原文快照/内部理解/外部API参考/踩坑笔记 各自独立成文 |
 | 文档流程 docs-process | [claude-md-entry-point](skills/docs-process/claude-md-entry-point/SKILL.md) | CLAUDE.md 精简作 AI 会话入口，详细状态放 docs/status.md，AI 私有记忆只留跨项目经验 |
 | 文档流程 docs-process | [portable-claude-project](skills/docs-process/portable-claude-project/SKILL.md) | 换机器/搬文件夹后 AI 仍完整可用：会话记录靠 SessionEnd hook 落进 repo，`/export` 自动化不了 |
 | 集成对接 integration | [third-party-api-lookup](skills/integration/third-party-api-lookup/SKILL.md) | 查阅/逆向第三方开放平台 API，从 DOM 编码源抓字段层级，落库+回读验证 |
 
 > 根目录的 `SKILL.md`（`cybertron-studio`）是一个独立的全栈脚手架 skill（React 前端 + Go 后端 +
-> SQLite/MySQL/PostgreSQL），与上表 9 个方法论型 skill 性质不同，按需单独使用。
+> SQLite/MySQL/PostgreSQL），与上表可复用的专项 skill 性质不同，按需单独使用。
 
 ## 怎么用
 
 - **单个引入**：把某个 skill 目录（例如 `skills/discipline/no-fudging/`）整个拷贝进
   `~/.claude/skills/`（全局生效）或项目内 `.claude/skills/`（仅该项目生效），Claude Code 会根据
   `SKILL.md` 里的 `description` 自动匹配触发时机。
+- **Codex**：单个 skill 目录也可放入 `~/.codex/skills/`，遵循同一份 `SKILL.md`；无需复制某个项目的路径或账号。
 - **整库参考**：也可以把整个仓库克隆下来，当成一份"方法论清单"直接查阅，按需摘取段落写进自己的
   项目规范里。
-- 每个 `SKILL.md` 都是自包含的：一句话规则 + 真实案例 + 该怎么做的对照表 + 危险信号自查清单，可以直接
-  读、直接照做，不需要额外上下文。
+- 每个skill目录包含入口说明及其需要的参考资料/辅助脚本，按完整目录引入；入口不依赖原项目的会话上下文。
+
+`cdp-test-browser` 带可执行辅助脚本，安装后在它的目录运行 `npm ci`（只装驱动）。
+在目标项目中固定 `PROJECT_ID` 使用；Chrome程序可共用，每项目profile与调试端口独立。
+资料和实例记录保存在用户目录，不能随skill或项目提交。详见该skill的profile策略。
 
 ## 项目状态存档 projects/
 
